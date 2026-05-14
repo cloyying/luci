@@ -68,6 +68,23 @@ return view.extend({
 		o.value('ipv6', _('IPv6'));
 		o.modalonly = true;
 
+		o = s.option(form.Flag, 'track_gateway', _('Track gateway'),
+			_('Automatically track the next hop peer. Applies only to point to point connections.'));
+		o.depends('family', 'ipv4');
+		o.default = '0';
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'snat6', _('IPv6 SNAT'),
+			_('Source-NAT mwan3-rerouted router-originated IPv6 traffic egressing this interface. ' +
+			  'Leave blank or set to 0 to disable (default). Set to 1 to SNAT to the interface\'s primary global address. ' +
+			  'Set to a literal IPv6 address to SNAT to that address (e.g. NPTv6-style fixed source). ' +
+			  'Default is off because RFC 6724 source-address selection and SADR routing can solve the same ' +
+			  'problem without translation, and NAT66 is harmful in PA/ULA designs.'));
+		o.depends('family', 'ipv6');
+		o.placeholder = '0';
+		o.rmempty = true;
+		o.modalonly = true;
+
 		o = s.option(form.DynamicList, 'track_ip', _('Tracking hostname or IP address'),
 			_('This hostname or IP address will be pinged to determine if the link is up or down. Leave blank to assume interface is always online'));
 		o.datatype = 'host';
@@ -278,7 +295,7 @@ return view.extend({
 		o.value('10');
 
 		o = s.option(form.DynamicList, 'flush_conntrack', _('Flush conntrack table'),
-			_('Flush global firewall conntrack table on interface events'));
+			_('Flush the entire global conntrack table on selected events. Per-interface conntrack entries are already flushed automatically on ifdown.'));
 		o.value('ifup', _('ifup (netifd)'));
 		o.value('ifdown', _('ifdown (netifd)'));
 		o.value('connected', _('connected (mwan3)'));

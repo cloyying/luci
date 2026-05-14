@@ -12,7 +12,12 @@
 			},
 			"ubus": {
 				"mwan3": [
-					"status"
+					"status",
+					"nftset_info",
+					"nftset_members",
+					"nftset_elements",
+					"resolve_host",
+					"routing_health"
 				]
 			}
 		},
@@ -33,6 +38,9 @@
 				"/usr/sbin/mwan3 internal ipv4": [
 					"exec"
 				],
+				"/usr/sbin/mwan3 internal ipv6": [
+					"exec"
+				],
 				"/usr/sbin/mwan3 ifup *": [
 					"exec"
 				],
@@ -43,6 +51,11 @@
 			"ubus": {
 				"file": [
 					"exec"
+				],
+				"mwan3": [
+					"nftset_flush",
+					"nftset_reload",
+					"nftset_resolve"
 				]
 			}
 		}
@@ -66,13 +79,21 @@
 				"/usr/bin/arping": [
 					"list"
 				],
-				"/usr/libexec/luci-mwan3 ipset dump": [
+				"/usr/libexec/luci-mwan3 nftset dump": [
 					"exec"
 				]
 			},
 			"ubus": {
+				"file": [
+					"read",
+					"list"
+				],
 				"mwan3": [
-					"status"
+					"status",
+					"nftset_info",
+					"nftset_members",
+					"nftset_elements",
+					"resolve_host"
 				]
 			},
 			"uci": [
@@ -84,6 +105,17 @@
 			"file": {
 				"/etc/mwan3.user": [
 					"write"
+				]
+			},
+			"ubus": {
+				"file": [
+					"write",
+					"remove"
+				],
+				"mwan3": [
+					"nftset_flush",
+					"nftset_reload",
+					"nftset_resolve"
 				]
 			},
 			"uci": [
