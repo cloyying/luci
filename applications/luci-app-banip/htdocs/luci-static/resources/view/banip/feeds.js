@@ -22,14 +22,19 @@ let fileSize = 0;
 	button state helper
 */
 function updateButtons() {
-	const buttons = document.querySelectorAll('#btnClear, #btnCreate, #btnSave, #btnUpload, #btnDownload');
+	const enable = function (id) {
+		const btn = document.getElementById(id);
+		if (btn) {
+			btn.removeAttribute('disabled');
+		}
+	};
 	if (fileSize === 0) {
-		if (buttons[1]) buttons[1].removeAttribute('disabled');
-		if (buttons[2]) buttons[2].removeAttribute('disabled');
+		enable('btnCreate');
+		enable('btnUpload');
 	} else {
-		if (buttons[0]) buttons[0].removeAttribute('disabled');
-		if (buttons[3]) buttons[3].removeAttribute('disabled');
-		if (buttons[4]) buttons[4].removeAttribute('disabled');
+		enable('btnDownload');
+		enable('btnClear');
+		enable('btnSave');
 	}
 }
 
@@ -234,6 +239,7 @@ return view.extend({
 			o.value('feed 1', _('<IP-Address>'));
 			o.value('feed 1 ,', _('<IP-Address><CSV-Separator>'));
 			o.value('feed 13', _('<IP-Address><Space><Netmask>'));
+			o.value('feed 4 "', _('<JSON Lines><IP-Address><JSON Lines>'));
 			o.value('suricata 1', _('<Suricata Syntax>'));
 			o.optional = true;
 			o.rmempty = true;
