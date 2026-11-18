@@ -1,6 +1,7 @@
 'use strict';
 'require baseclass';
 'require rpc';
+'require mwan3.components as components';
 
 const callMwan3Status = rpc.declare({
 	object: 'mwan3',
@@ -8,12 +9,6 @@ const callMwan3Status = rpc.declare({
 	params: ['section'],
 	expect: {  },
 });
-
-document.querySelector('head').appendChild(E('link', {
-	'rel': 'stylesheet',
-	'type': 'text/css',
-	'href': L.resource('view/mwan3/mwan3.css')
-}));
 
 return baseclass.extend({
 	title: _('MultiWAN Manager'),
@@ -28,89 +23,23 @@ return baseclass.extend({
 		if (!result[0].interfaces)
 			return null;
 
-		var container = E('div', { 'id': 'mwan3-service-status' });
-		var iface;
-		for ( iface in result[0].interfaces) {
-			var state = '';
-			var css = '';
-			var time = '';
-			var tname = '';
-			switch (result[0].interfaces[iface].status) {
-				case 'online':
-					state = _('Online');
-					css = 'alert-message success';
-					time = '%t'.format(result[0].interfaces[iface].online);
-					tname = _('Uptime');
-					break;
-				case 'offline':
-					state = _('Offline');
-					css = 'alert-message danger';
-					time = '%t'.format(result[0].interfaces[iface].offline);
-					tname = _('Downtime');
-					break;
-				case 'notracking':
-					state = _('No Tracking');
-					if ((result[0].interfaces[iface].uptime) > 0) {
-						css = 'alert-message success';
-						time = '%t'.format(result[0].interfaces[iface].uptime);
-						tname = _('Uptime');
-					}
-					else {
-						css = 'alert-message warning';
-						time = '';
-						tname = '';
-					}
-					break;
-				default:
-					css = 'alert-message warning';
-					state = _('Disabled');
-					time = '';
-					tname = '';
-					break;
-			}
+		components.loadStyle();
 
-			if (time !== '' ) {
-				container.appendChild(
-					E('div', { 'class': css }, [
-						E('div', {}, [
-							E('strong', {}, [
-								_('Interface'), ':', ' '
-							]),
-							iface
-						]),
-						E('div', {}, [
-							E('strong', {}, [
-								_('Status'), ':', ' '
-							]),
-							state
-						]),
-						E('div', {}, [
-							E('strong', {}, [
-								tname, ':', ' '
-							]),
-							time
-						])
-					])
-				);
-			}
-			else {
-				container.appendChild(
-					E('div', { 'class': css }, [
-						E('div', {}, [
-							E('strong', {}, [
-								_('Interface'), ':', ' '
-							]),
-							iface
-						]),
-						E('div', {}, [
-							E('strong', {}, [
-								_('Status'), ':', ' '
-							]),
-							state
-						])
-					])
-				);
-			}
+		var container = E('div', { 'class': 'mwan3-flexwrap' });
+
+		for (var iface in result[0].interfaces) {
+			var d = result[0].interfaces[iface];
+			var si = components.statusInfo(d);
+
+			var children = [
+				E('div', {}, [ E('strong', {}, _('Interface') + ':\u00a0'), iface ]),
+				E('div', {}, [ E('strong', {}, _('Status') + ':\u00a0'), components.statusText(si.label, si.severity) ]),
+			];
+
+			if (si.duration != null)
+				children.push(E('div', {}, [ E('strong', {}, si.durationLabel + ':\u00a0'), '%t'.format(si.duration) ]));
+
+			container.appendChild(components.card(si.severity, children, 'mwan3-card--sm mwan3-card--grow'));
 		}
 
 		return container;

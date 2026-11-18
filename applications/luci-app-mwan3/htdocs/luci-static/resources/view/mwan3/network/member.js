@@ -3,6 +3,8 @@
 'require view';
 'require uci';
 'require ui';
+'require mwan3.components as components';
+'require mwan3.validators as validators';
 
 return view.extend({
 	load: function() {
@@ -12,6 +14,8 @@ return view.extend({
 	},
 
 	render: function () {
+		components.loadStyle();
+
 		let m, s, o;
 
 		m = new form.Map('mwan3', _('MultiWAN Manager - Members'),
@@ -29,21 +33,13 @@ return view.extend({
 			var el = form.GridSection.prototype.renderSectionAdd.apply(this, arguments),
 				nameEl = el.querySelector('.cbi-section-create-name');
 			ui.addValidator(nameEl, 'uciname', true, function(v) {
-				let sections = [
-					...uci.sections('mwan3', 'interface'),
-					...uci.sections('mwan3', 'member'),
-					...uci.sections('mwan3', 'policy'),
-					...uci.sections('mwan3', 'rule')
-				];
-
-				for (let j = 0; j < sections.length; j++) {
-					if (sections[j]['.name'] == v) {
-						return _('Members may not share the same name as configured interfaces, policies or rules.');
-					}
-				}
+				if (validators.sectionNameInUse(v))
+					return _('Members may not share the same name as configured interfaces, policies or rules.');
 				if (v.length > 15) return _('Name length shall not exceed 15 characters');
 				return true;
 			}, 'blur', 'keyup');
+			el.appendChild(E('div', { 'class': 'mwan3-banner' },
+				_('The Policy tab creates and manages members automatically. Only edit this section if you need custom metric or weight values.')));
 			return el;
 		};
 
@@ -58,7 +54,7 @@ return view.extend({
 			_('Acceptable values: 1-256. Defaults to 1 if not set'));
 		o.datatype = 'range(1, 256)';
 
-		o = s.option(form.Value, 'weight', ('Weight'),
+		o = s.option(form.Value, 'weight', _('Weight'),
 			_('Acceptable values: 1-1000. Defaults to 1 if not set'));
 		o.datatype = 'range(1, 1000)';
 
